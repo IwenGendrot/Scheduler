@@ -60,17 +60,10 @@ public class PatientController(IPatientService patientService, IClientService cl
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Create([FromBody] CreatePatientDto dto)
     {
+        CheckClientExistence(dto.ClientId);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
-        }
-        try
-        {
-            Client client = _clientService.Get(dto.ClientId);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
         }
 
         Patient patient = _patientService.Create(dto);
@@ -90,18 +83,10 @@ public class PatientController(IPatientService patientService, IClientService cl
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdatePatientDto dto)
     {
+        CheckClientExistence(dto.ClientId);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
-        }
-
-        try
-        {
-            Client client = _clientService.Get(dto.ClientId);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
         }
 
         try
@@ -111,6 +96,18 @@ public class PatientController(IPatientService patientService, IClientService cl
         catch (KeyNotFoundException ex)
         {
             return NotFound(ex.Message);
+        }
+    }
+
+    private void CheckClientExistence(Guid clientId)
+    {
+        try
+        {
+            _clientService.Get(clientId);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            ModelState.AddModelError("Client does not exist", ex.Message);
         }
     }
 }

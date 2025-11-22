@@ -44,17 +44,13 @@ public class AppointementController(IAppointementService appointementService, IC
     /// <returns></returns>
     [HttpGet("{clientId:guid}/{date:datetime}")]
     [ProducesResponseType<IReadOnlyCollection<int>>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAvailableHoursOnDate([FromRoute] Guid clientId, [FromRoute] DateOnly date)
     {
-        try
+        CheckClientExistence(clientId);
+        if (!ModelState.IsValid)
         {
-            _clientService.Get(clientId);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
+            return BadRequest(ModelState);
         }
         return Ok(_appointementService.GetAvailableHoursOnDate(clientId, date));
     }
@@ -67,16 +63,13 @@ public class AppointementController(IAppointementService appointementService, IC
     /// <returns></returns>
     [HttpGet("{clientId:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetForClient([FromRoute] Guid clientId)
     {
-        try
+        CheckClientExistence(clientId);
+        if (!ModelState.IsValid)
         {
-            _clientService.Get(clientId);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
+            return BadRequest(ModelState);
         }
         return Ok(_appointementService.GetForClient(clientId));
     }
@@ -88,16 +81,13 @@ public class AppointementController(IAppointementService appointementService, IC
     /// <returns></returns>
     [HttpGet("{patientId:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetForPatient([FromRoute] Guid patientId)
     {
-        try
+        CheckPartnerExistence(patientId);
+        if (!ModelState.IsValid)
         {
-            _patientService.Get(patientId);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
+            return BadRequest(ModelState);
         }
         return Ok(_appointementService.GetForPatient(patientId));
     }
@@ -110,17 +100,14 @@ public class AppointementController(IAppointementService appointementService, IC
     /// <returns></returns>
     [HttpGet("{clientId:guid}:{patientId:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetForClientAndPatient([FromRoute] Guid clientId, [FromRoute] Guid patientId)
     {
-        try
+        CheckClientExistence(clientId);
+        CheckPartnerExistence(patientId);
+        if (!ModelState.IsValid)
         {
-            _clientService.Get(clientId);
-            _patientService.Get(patientId);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
+            return BadRequest(ModelState);
         }
         return Ok(_appointementService.GetForClientAndPatient(clientId, patientId));
     }
@@ -147,18 +134,11 @@ public class AppointementController(IAppointementService appointementService, IC
     public async Task<IActionResult> Create([FromBody] CreateAppointementDto dto)
     {
         CheckAppointementTime(dto.AppointementDate);
+        CheckClientExistence(dto.ClientId);
+        CheckPartnerExistence(dto.PatientId);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
-        }
-        try
-        {
-            _clientService.Get(dto.ClientId);
-            _patientService.Get(dto.PatientId);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
         }
 
         Appointement appointement = _appointementService.Create(dto);
@@ -173,28 +153,42 @@ public class AppointementController(IAppointementService appointementService, IC
     [HttpPut("{id:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateAppointementDto dto)
     {
         CheckAppointementTime(dto.AppointementDate);
+        CheckClientExistence(dto.ClientId);
+        CheckPartnerExistence(dto.PatientId);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
-        try
-        {
-            _clientService.Get(dto.ClientId);
-            _patientService.Get(dto.PatientId);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-
         Appointement appointement = _appointementService.Update(id, dto);
         return CreatedAtAction(nameof(Get), new { id = appointement.Id }, appointement);
     }
 
+    private void CheckClientExistence(Guid clientId)
+    {
+        try
+        {
+            _clientService.Get(clientId);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            ModelState.AddModelError("Client does not exist", ex.Message);
+        }
+    }
+
+    private void CheckPartnerExistence(Guid patientId)
+    {
+        try
+        {
+            _patientService.Get(patientId);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            ModelState.AddModelError("Patient does not exist", ex.Message);
+        }
+    }
 
     private void CheckAppointementTime(DateOnly appointementDate)
     {
