@@ -42,17 +42,18 @@ public class AppointementController(IAppointementService appointementService, IC
     /// <param name="clientId"></param>
     /// <param name="date"></param>
     /// <returns></returns>
-    [HttpGet("{clientId:guid}/{date:datetime}")]
+    [HttpPost("client/date")]
     [ProducesResponseType<IReadOnlyCollection<int>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAvailableHoursOnDate([FromRoute] Guid clientId, [FromRoute] DateOnly date)
+    public async Task<IActionResult> GetAvailableHoursOnDate([FromBody] GetAvailableAppointementDto dto)
     {
-        CheckClientExistence(clientId);
+        CheckClientExistence(dto.ClientId);
+        CheckAppointementDate(dto.AppointementDate);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
-        return Ok(_appointementService.GetAvailableHoursOnDate(clientId, date));
+        return Ok(_appointementService.GetAvailableHoursOnDate(dto.ClientId, dto.AppointementDate));
     }
 
 
@@ -61,7 +62,7 @@ public class AppointementController(IAppointementService appointementService, IC
     /// </summary>
     /// <param name="clientId"></param>
     /// <returns></returns>
-    [HttpGet("{clientId:guid}")]
+    [HttpGet("client/{clientId:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetForClient([FromRoute] Guid clientId)
@@ -79,7 +80,7 @@ public class AppointementController(IAppointementService appointementService, IC
     /// </summary>
     /// <param name="patientId"></param>
     /// <returns></returns>
-    [HttpGet("{patientId:guid}")]
+    [HttpGet("patient/{patientId:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetForPatient([FromRoute] Guid patientId)
@@ -98,7 +99,7 @@ public class AppointementController(IAppointementService appointementService, IC
     /// <param name="clientId"></param>
     /// <param name="patientId"></param>
     /// <returns></returns>
-    [HttpGet("{clientId:guid}:{patientId:guid}")]
+    [HttpGet("client/{clientId:guid}/patient/{patientId:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetForClientAndPatient([FromRoute] Guid clientId, [FromRoute] Guid patientId)
@@ -133,7 +134,7 @@ public class AppointementController(IAppointementService appointementService, IC
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateAppointementDto dto)
     {
-        CheckAppointementTime(dto.AppointementDate);
+        CheckAppointementDate(dto.AppointementDate);
         CheckClientExistence(dto.ClientId);
         CheckPartnerExistence(dto.PatientId);
         if (!ModelState.IsValid)
@@ -155,7 +156,7 @@ public class AppointementController(IAppointementService appointementService, IC
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateAppointementDto dto)
     {
-        CheckAppointementTime(dto.AppointementDate);
+        CheckAppointementDate(dto.AppointementDate);
         CheckClientExistence(dto.ClientId);
         CheckPartnerExistence(dto.PatientId);
         if (!ModelState.IsValid)
@@ -190,7 +191,7 @@ public class AppointementController(IAppointementService appointementService, IC
         }
     }
 
-    private void CheckAppointementTime(DateOnly appointementDate)
+    private void CheckAppointementDate(DateOnly appointementDate)
     {
         if (Appointement.ClosedDays.Contains(appointementDate.DayOfWeek))
         {
