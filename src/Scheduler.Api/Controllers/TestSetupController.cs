@@ -16,6 +16,10 @@ public class TestSetupController(IAppointementService appointementService, IClie
     private readonly IClientService _clientService = clientService;
     private readonly IPatientService _patientService = patientService;
 
+    /// <summary>
+    /// Setup few entities instances to help run tests
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     [ProducesResponseType<string>(StatusCodes.Status200OK)]
     public async Task<IActionResult> Get()
@@ -27,7 +31,7 @@ public class TestSetupController(IAppointementService appointementService, IClie
         Patient patientOther = _patientService.Create(new CreatePatientDto(clientOne.Id, "PatientOther"));
         Patient patientTwo = _patientService.Create(new CreatePatientDto(clientTwo.Id, "PatientTwo"));
 
-        Appointement appointementOne = _appointementService.Create(new CreateAppointementDto(clientOne.Id, patientOne.Id, new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day + 1), 11));
+        Appointement appointementOne = _appointementService.Create(new CreateAppointementDto(clientOne.Id, patientOne.Id, new DateOnly(2025, 11, 17), 11));
 
         return Ok($"""
             Created 2 clients, 3 patients and 1 appointement:
