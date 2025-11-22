@@ -14,12 +14,17 @@ public class AppointementService : IAppointementService
 
     public Appointement Create(CreateAppointementDto dto)
     {
-        return _appointementRepository.Create(dto.ClientId, dto.PatientId, dto.AppointementTime);
+        return _appointementRepository.Create(dto.ClientId, dto.PatientId, dto.AppointementDate, dto.Hour);
     }
 
     public Appointement Get(Guid id)
     {
         return _appointementRepository.Get(id);
+    }
+
+    public IReadOnlyCollection<int> GetAvailableHoursOnDate(Guid clientId, DateOnly appointementDate)
+    {
+        return _appointementRepository.GetAvailableHoursOnDate(clientId, appointementDate);
     }
 
     public IReadOnlyCollection<Appointement> GetAll()
@@ -42,8 +47,8 @@ public class AppointementService : IAppointementService
         return _appointementRepository.GetForPatient(patientId);
     }
 
-    public Appointement Update(UpdateAppointementDto dto)
+    public Appointement Update(Guid id, UpdateAppointementDto dto)
     {
-        return _appointementRepository.Update(dto.Id, dto.AppointementTime);
+        return _appointementRepository.Update(id, dto.ClientId, dto.PatientId, dto.AppointementDate, dto.Hour);
     }
 }

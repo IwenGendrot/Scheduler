@@ -4,11 +4,12 @@ namespace Scheduler.Application.Appointements.Dtos;
 
 public class CreateAppointementDto
 {
-    public CreateAppointementDto(Guid clientId, Guid patientId, DateTime appointementTime)
+    public CreateAppointementDto(Guid clientId, Guid patientId, DateOnly appointementDate, int hour)
     {
         ClientId = clientId;
         PatientId = patientId;
-        AppointementTime = appointementTime;
+        AppointementDate = appointementDate;
+        Hour = hour;
     }
 
     [Required]
@@ -17,6 +18,10 @@ public class CreateAppointementDto
     [Required]
     public Guid PatientId { get; protected set; }
 
+    [DataType(DataType.Date)]
     [Required]
-    public DateTime AppointementTime { get; protected set; }
+    public DateOnly AppointementDate { get; protected set; }
+
+    [Required, Range(minimum: 9, maximum: 18)]
+    public int Hour { get; protected set; }
 }

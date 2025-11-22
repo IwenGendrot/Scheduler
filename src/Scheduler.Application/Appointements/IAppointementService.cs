@@ -6,6 +6,8 @@ public interface IAppointementService
 {
     Appointement Create(CreateAppointementDto dto);
 
+    IReadOnlyCollection<int> GetAvailableHoursOnDate(Guid clientId, DateOnly appointementDate);
+
     IReadOnlyCollection<Appointement> GetAll();
 
     Appointement Get(Guid id);
@@ -16,5 +18,5 @@ public interface IAppointementService
 
     IReadOnlyCollection<Appointement> GetForPatient(Guid patientId);
 
-    Appointement Update(UpdateAppointementDto dto);
+    Appointement Update(Guid id, UpdateAppointementDto dto);
 }

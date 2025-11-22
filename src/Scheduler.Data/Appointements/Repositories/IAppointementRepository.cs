@@ -2,9 +2,11 @@
 
 public interface IAppointementRepository
 {
-    Appointement Create(Guid clientId, Guid patientId, DateTime appointementTime);
+    Appointement Create(Guid clientId, Guid patientId, DateOnly appointementDate, int hour);
 
     IReadOnlyCollection<Appointement> GetAll();
+
+    IReadOnlyCollection<int> GetAvailableHoursOnDate(Guid clientId, DateOnly appointementDate);
 
     Appointement Get(Guid id);
 
@@ -14,5 +16,5 @@ public interface IAppointementRepository
 
     IReadOnlyCollection<Appointement> GetForPatient(Guid patientId);
 
-    Appointement Update(Guid id, DateTime appointementTime);
+    Appointement Update(Guid id, Guid clientId, Guid patientId, DateOnly appointementDate, int hour);
 }

@@ -36,6 +36,19 @@ public class AppointementController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Get available hours for given client on given date
+    /// </summary>
+    /// <param name="clientId"></param>
+    /// <param name="date"></param>
+    /// <returns></returns>
+    [HttpGet("{clientId:guid}/{date:datetime}")]
+    [ProducesResponseType<IReadOnlyCollection<int>>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAvailableHoursOnDate([FromRoute] Guid clientId, [FromRoute] DateOnly date)
+    {
+        return Ok(_appointementService.GetAvailableHoursOnDate(clientId, date));
+    }
+
 
     /// <summary>
     /// Get all appointements for a given clientId
@@ -95,7 +108,7 @@ public class AppointementController : ControllerBase
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateAppointementDto dto)
     {
-        CheckAppointementTime(dto.AppointementTime);
+        CheckAppointementTime(dto.AppointementDate);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -109,30 +122,26 @@ public class AppointementController : ControllerBase
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [HttpPut]
+    [HttpPut("{id:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Update([FromBody] UpdateAppointementDto dto)
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateAppointementDto dto)
     {
-        CheckAppointementTime(dto.AppointementTime);
+        CheckAppointementTime(dto.AppointementDate);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
-        Appointement appointement = _appointementService.Update(dto);
+        Appointement appointement = _appointementService.Update(id, dto);
         return CreatedAtAction(nameof(Get), new { id = appointement.Id }, appointement);
     }
 
 
-    private void CheckAppointementTime(DateTime appointementTime)
+    private void CheckAppointementTime(DateOnly appointementDate)
     {
-        if (Appointement.ClosedDays.Contains(appointementTime.DayOfWeek))
+        if (Appointement.ClosedDays.Contains(appointementDate.DayOfWeek))
         {
             ModelState.AddModelError("Clinic is closed on Saturdays and Sundays", "Choose a weekday between Monday and Friday");
-        }
-        if (appointementTime.Hour < Appointement.OpeningHour || appointementTime.Hour > Appointement.ClosingHour)
-        {
-            ModelState.AddModelError("Clinic is closed before 9 and after 19", "Choose an hour between 9 and 19");
         }
     }
 }

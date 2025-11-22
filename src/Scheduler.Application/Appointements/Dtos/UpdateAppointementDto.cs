@@ -1,14 +1,14 @@
-﻿namespace Scheduler.Application.Appointements.Dtos;
+﻿using System.ComponentModel.DataAnnotations;
 
-public class UpdateAppointementDto
+namespace Scheduler.Application.Appointements.Dtos;
+
+public class UpdateAppointementDto : CreateAppointementDto
 {
-    public Guid Id { get; private set; }
-
-    public DateTime AppointementTime { get; private set; }
-
-    public UpdateAppointementDto(Guid id, DateTime appointementTime)
+    public UpdateAppointementDto(Guid id, Guid clientId, Guid patientId, DateOnly appointementDate, int hour) : base(clientId, patientId, appointementDate, hour)
     {
         Id = id;
-        AppointementTime = appointementTime;
     }
+
+    [Required]
+    public Guid Id { get; private set; }
 }
