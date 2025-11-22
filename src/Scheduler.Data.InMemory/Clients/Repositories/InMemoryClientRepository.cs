@@ -1,5 +1,6 @@
-﻿
-namespace Scheduler.Data.Clients.Repositories;
+﻿using Scheduler.Data.Clients.Repositories;
+
+namespace Scheduler.Data.InMemory.Clients.Repositories;
 
 public class InMemoryClientRepository : IClientRepository
 {
@@ -24,21 +25,13 @@ public class InMemoryClientRepository : IClientRepository
 
     public Client Get(Guid id)
     {
-        Client? client = _clients.FirstOrDefault(c => c.Id == id);
-        if (client is null)
-        {
-            throw new KeyNotFoundException($"Not client for Id : {id}");
-        }
+        Client client = _clients.FirstOrDefault(c => c.Id == id) ?? throw new KeyNotFoundException($"Not client for Id : {id}");
         return client;
     }
 
     public Client Update(Guid id, string name)
     {
-        Client? client = _clients.FirstOrDefault(c => c.Id == id);
-        if (client is null)
-        {
-            throw new KeyNotFoundException($"Not client for Id {id}");
-        }
+        Client client = _clients.FirstOrDefault(c => c.Id == id) ?? throw new KeyNotFoundException($"Not client for Id {id}");
         client.Update(name);
         return client;
     }

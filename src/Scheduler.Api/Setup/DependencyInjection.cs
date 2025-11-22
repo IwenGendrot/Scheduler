@@ -3,6 +3,9 @@ using Scheduler.Application.Clients;
 using Scheduler.Application.Patients;
 using Scheduler.Data.Appointements.Repositories;
 using Scheduler.Data.Clients.Repositories;
+using Scheduler.Data.InMemory.Appointements.Repositories;
+using Scheduler.Data.InMemory.Clients.Repositories;
+using Scheduler.Data.InMemory.Patients.Repositories;
 using Scheduler.Data.Patients.Repositories;
 
 namespace Scheduler.Api.Setup;

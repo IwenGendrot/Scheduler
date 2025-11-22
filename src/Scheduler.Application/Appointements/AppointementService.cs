@@ -3,14 +3,9 @@ using Scheduler.Data.Appointements.Repositories;
 
 namespace Scheduler.Application.Appointements;
 
-public class AppointementService : IAppointementService
+public class AppointementService(IAppointementRepository appointementRepository) : IAppointementService
 {
-    private readonly IAppointementRepository _appointementRepository;
-
-    public AppointementService(IAppointementRepository appointementRepository)
-    {
-        _appointementRepository = appointementRepository;
-    }
+    private readonly IAppointementRepository _appointementRepository = appointementRepository;
 
     public Appointement Create(CreateAppointementDto dto)
     {

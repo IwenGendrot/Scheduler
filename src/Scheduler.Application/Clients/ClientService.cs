@@ -3,14 +3,9 @@ using Scheduler.Data.Clients.Repositories;
 
 namespace Scheduler.Application.Clients;
 
-public class ClientService : IClientService
+public class ClientService(IClientRepository clientRepository) : IClientService
 {
-    private readonly IClientRepository _clientRepository;
-
-    public ClientService(IClientRepository clientRepository)
-    {
-        _clientRepository = clientRepository;
-    }
+    private readonly IClientRepository _clientRepository = clientRepository;
 
     public Client Create(CreateClientDto dto)
     {

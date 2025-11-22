@@ -1,4 +1,6 @@
-﻿namespace Scheduler.Data.Patients.Repositories;
+﻿using Scheduler.Data.Patients.Repositories;
+
+namespace Scheduler.Data.InMemory.Patients.Repositories;
 
 public class InMemoryPatientRepository : IPatientRepository
 {
@@ -23,21 +25,13 @@ public class InMemoryPatientRepository : IPatientRepository
 
     public Patient Get(Guid id)
     {
-        Patient? patient = _patients.FirstOrDefault(c => c.Id == id);
-        if (patient is null)
-        {
-            throw new KeyNotFoundException($"Not patient for Id {id}");
-        }
+        Patient patient = _patients.FirstOrDefault(c => c.Id == id) ?? throw new KeyNotFoundException($"Not patient for Id {id}");
         return patient;
     }
 
     public Patient Update(Guid id, Guid? clientId, string? name)
     {
-        Patient? patient = _patients.FirstOrDefault(c => c.Id == id);
-        if (patient is null)
-        {
-            throw new KeyNotFoundException($"Not patient for Id {id}");
-        }
+        Patient patient = _patients.FirstOrDefault(c => c.Id == id) ?? throw new KeyNotFoundException($"Not patient for Id {id}");
         patient.Update(clientId ?? patient.ClientId, name ?? patient.Name);
         return patient;
     }

@@ -10,23 +10,16 @@ namespace Scheduler.Api.Controllers;
 [ApiController]
 [Route("appointement")]
 [Produces(MediaTypeNames.Application.Json)]
-public class AppointementController : ControllerBase
+public class AppointementController(IAppointementService appointementService, IClientService clientService, IPatientService patientService) : ControllerBase
 {
-    private readonly IAppointementService _appointementService;
-    private readonly IClientService _clientService;
-    private readonly IPatientService _patientService;
-
-    public AppointementController(IAppointementService appointementService, IClientService clientService, IPatientService patientService)
-    {
-        _appointementService = appointementService;
-        _clientService = clientService;
-        _patientService = patientService;
-    }
+    private readonly IAppointementService _appointementService = appointementService;
+    private readonly IClientService _clientService = clientService;
+    private readonly IPatientService _patientService = patientService;
 
     /// <summary>
     /// Get appointement from its id
     /// </summary>
-    /// <param name="appointementId"></param>
+    /// <param name="id"></param>
     /// <returns></returns>
     [HttpGet("{id:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]

@@ -9,16 +9,10 @@ namespace Scheduler.Api.Controllers;
 [ApiController]
 [Route("patient")]
 [Produces(MediaTypeNames.Application.Json)]
-public class PatientController : ControllerBase
+public class PatientController(IPatientService patientService, IClientService clientService) : ControllerBase
 {
-    private readonly IClientService _clientService;
-    private readonly IPatientService _patientService;
-
-    public PatientController(IPatientService patientService, IClientService clientService)
-    {
-        _patientService = patientService;
-        _clientService = clientService;
-    }
+    private readonly IClientService _clientService = clientService;
+    private readonly IPatientService _patientService = patientService;
 
     /// <summary>
     /// Get a patient looking for its id
@@ -29,7 +23,7 @@ public class PatientController : ControllerBase
     [HttpGet("{id:guid}")]
     [ProducesResponseType<Patient>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Get([FromRoute] Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Get([FromRoute] Guid id)
     {
         try
         {
@@ -48,7 +42,11 @@ public class PatientController : ControllerBase
     /// <returns>All patients</returns>
     [HttpGet]
     [ProducesResponseType<IReadOnlyCollection<Patient>>(StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAll(CancellationToken cancellationToken) => Ok(_patientService.GetAll());
+    public async Task<IActionResult> GetAll()
+    {
+        return Ok(_patientService.GetAll());
+    }
+
 
     /// <summary>
     /// Create a patient
@@ -60,7 +58,7 @@ public class PatientController : ControllerBase
     [ProducesResponseType<Patient>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Create([FromBody] CreatePatientDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create([FromBody] CreatePatientDto dto)
     {
         if (!ModelState.IsValid)
         {
@@ -90,7 +88,7 @@ public class PatientController : ControllerBase
     [ProducesResponseType<Patient>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdatePatientDto dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdatePatientDto dto)
     {
         if (!ModelState.IsValid)
         {
