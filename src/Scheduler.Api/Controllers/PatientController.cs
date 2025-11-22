@@ -11,8 +11,8 @@ namespace Scheduler.Api.Controllers;
 [Produces(MediaTypeNames.Application.Json)]
 public class PatientController : ControllerBase
 {
-    private readonly IPatientService _patientService;
     private readonly IClientService _clientService;
+    private readonly IPatientService _patientService;
 
     public PatientController(IPatientService patientService, IClientService clientService)
     {
@@ -99,7 +99,7 @@ public class PatientController : ControllerBase
 
         try
         {
-            Client client = _clientService.Get(id);
+            Client client = _clientService.Get(dto.ClientId);
         }
         catch (KeyNotFoundException ex)
         {

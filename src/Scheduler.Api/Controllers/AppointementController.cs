@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Scheduler.Application.Appointements;
 using Scheduler.Application.Appointements.Dtos;
+using Scheduler.Application.Clients;
+using Scheduler.Application.Patients;
 using System.Net.Mime;
 
 namespace Scheduler.Api.Controllers;
@@ -11,10 +13,14 @@ namespace Scheduler.Api.Controllers;
 public class AppointementController : ControllerBase
 {
     private readonly IAppointementService _appointementService;
+    private readonly IClientService _clientService;
+    private readonly IPatientService _patientService;
 
-    public AppointementController(IAppointementService appointementService)
+    public AppointementController(IAppointementService appointementService, IClientService clientService, IPatientService patientService)
     {
         _appointementService = appointementService;
+        _clientService = clientService;
+        _patientService = patientService;
     }
 
     /// <summary>
@@ -24,6 +30,7 @@ public class AppointementController : ControllerBase
     /// <returns></returns>
     [HttpGet("{id:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get([FromRoute] Guid id)
     {
         try
@@ -44,8 +51,18 @@ public class AppointementController : ControllerBase
     /// <returns></returns>
     [HttpGet("{clientId:guid}/{date:datetime}")]
     [ProducesResponseType<IReadOnlyCollection<int>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+
     public async Task<IActionResult> GetAvailableHoursOnDate([FromRoute] Guid clientId, [FromRoute] DateOnly date)
     {
+        try
+        {
+            _clientService.Get(clientId);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
         return Ok(_appointementService.GetAvailableHoursOnDate(clientId, date));
     }
 
@@ -57,8 +74,17 @@ public class AppointementController : ControllerBase
     /// <returns></returns>
     [HttpGet("{clientId:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetForClient([FromRoute] Guid clientId)
     {
+        try
+        {
+            _clientService.Get(clientId);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
         return Ok(_appointementService.GetForClient(clientId));
     }
 
@@ -69,8 +95,17 @@ public class AppointementController : ControllerBase
     /// <returns></returns>
     [HttpGet("{patientId:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetForPatient([FromRoute] Guid patientId)
     {
+        try
+        {
+            _patientService.Get(patientId);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
         return Ok(_appointementService.GetForPatient(patientId));
     }
 
@@ -82,8 +117,18 @@ public class AppointementController : ControllerBase
     /// <returns></returns>
     [HttpGet("{clientId:guid}:{patientId:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetForClientAndPatient([FromRoute] Guid clientId, [FromRoute] Guid patientId)
     {
+        try
+        {
+            _clientService.Get(clientId);
+            _patientService.Get(patientId);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
         return Ok(_appointementService.GetForClientAndPatient(clientId, patientId));
     }
 
@@ -113,6 +158,16 @@ public class AppointementController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+        try
+        {
+            _clientService.Get(dto.ClientId);
+            _patientService.Get(dto.PatientId);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+
         Appointement appointement = _appointementService.Create(dto);
         return CreatedAtAction(nameof(Get), new { id = appointement.Id }, appointement);
     }
@@ -125,6 +180,7 @@ public class AppointementController : ControllerBase
     [HttpPut("{id:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateAppointementDto dto)
     {
         CheckAppointementTime(dto.AppointementDate);
@@ -132,6 +188,16 @@ public class AppointementController : ControllerBase
         {
             return BadRequest(ModelState);
         }
+        try
+        {
+            _clientService.Get(dto.ClientId);
+            _patientService.Get(dto.PatientId);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+
         Appointement appointement = _appointementService.Update(id, dto);
         return CreatedAtAction(nameof(Get), new { id = appointement.Id }, appointement);
     }
