@@ -3,10 +3,10 @@ using Scheduler.Application.Clients;
 using Scheduler.Application.Clients.Dtos;
 using System.Net.Mime;
 
-namespace Scheduler.Controllers;
+namespace Scheduler.Api.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("client")]
 [Produces(MediaTypeNames.Application.Json)]
 public class ClientController : ControllerBase
 {
@@ -39,7 +39,7 @@ public class ClientController : ControllerBase
     }
 
     /// <summary>
-    /// Get all existing client
+    /// Get all existing clients
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns>All clients</returns>

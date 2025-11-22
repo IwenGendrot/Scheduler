@@ -1,14 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace Scheduler.Application.Clients.Dtos;
 
-namespace Scheduler.Application.Clients.Dtos;
-
-public class UpdateClientDto
+public class UpdateClientDto : CreateClientDto
 {
-    public UpdateClientDto(string name)
-    {
-        Name = name;
-    }
-
-    [Required, StringLength(maximumLength: Client.MaxNameLength)]
-    public string Name { get; private set; }
+    public UpdateClientDto(string name) : base(name)
+    { }
 }

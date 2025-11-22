@@ -3,28 +3,28 @@ namespace Scheduler.Data.Clients.Repositories;
 
 public class InMemoryClientRepository : IClientRepository
 {
-    private List<Client> clients;
+    private readonly List<Client> _clients;
 
     public InMemoryClientRepository()
     {
-        clients = [];
+        _clients = [];
     }
 
     public Client Create(string name)
     {
         Client client = Client.Create(name);
-        clients.Add(client);
+        _clients.Add(client);
         return client;
     }
 
     public IReadOnlyCollection<Client> GetAll()
     {
-        return clients.AsReadOnly();
+        return _clients.AsReadOnly();
     }
 
     public Client Get(Guid id)
     {
-        Client? client = clients.FirstOrDefault(c => c.Id == id);
+        Client? client = _clients.FirstOrDefault(c => c.Id == id);
         if (client is null)
         {
             throw new KeyNotFoundException($"Not client for Id : {id}");
@@ -34,10 +34,10 @@ public class InMemoryClientRepository : IClientRepository
 
     public Client Update(Guid id, string name)
     {
-        Client? client = clients.FirstOrDefault(c => c.Id == id);
+        Client? client = _clients.FirstOrDefault(c => c.Id == id);
         if (client is null)
         {
-            throw new KeyNotFoundException($"Not client for Id : {id}");
+            throw new KeyNotFoundException($"Not client for Id {id}");
         }
         client.Update(name);
         return client;

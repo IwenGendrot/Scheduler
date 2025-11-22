@@ -1,5 +1,20 @@
-﻿namespace Scheduler.Application.Appointements;
+﻿using Scheduler.Application.Appointements.Dtos;
+
+namespace Scheduler.Application.Appointements;
 
 public interface IAppointementService
 {
+    Appointement Create(CreateAppointementDto dto);
+
+    IReadOnlyCollection<Appointement> GetAll();
+
+    Appointement Get(Guid id);
+
+    IReadOnlyCollection<Appointement> GetForClient(Guid clientId);
+
+    IReadOnlyCollection<Appointement> GetForClientAndPatient(Guid clientId, Guid patientId);
+
+    IReadOnlyCollection<Appointement> GetForPatient(Guid patientId);
+
+    Appointement Update(UpdateAppointementDto dto);
 }

@@ -1,9 +1,10 @@
 ﻿namespace Scheduler;
 
-public class Client
+public class Client : Entity
 {
-    public Guid Id { get; private set; }
     public string Name { get; private set; }
+
+    public const int MaxNameLength = 128;
 
     public Client(Guid id, string name)
     {
@@ -14,6 +15,4 @@ public class Client
     public static Client Create(string name) => new(Guid.NewGuid(), name);
 
     public void Update(string name) => Name = name;
-
-    public const int MaxNameLength = 128;
 }

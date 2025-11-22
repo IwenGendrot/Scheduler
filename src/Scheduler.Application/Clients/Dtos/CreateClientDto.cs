@@ -10,5 +10,5 @@ public class CreateClientDto
     }
 
     [Required, StringLength(maximumLength: Client.MaxNameLength)]
-    public string Name { get; private set; }
+    public string Name { get; protected set; }
 }
