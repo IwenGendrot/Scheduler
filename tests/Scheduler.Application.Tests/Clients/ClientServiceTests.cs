@@ -59,8 +59,8 @@ public class ClientServiceTests
     public void GetAll_ShouldReturnClients()
     {
         IReadOnlyCollection<Client> result = _clientService.GetAll();
-        result.Should().NotBeNullOrEmpty();
-        result.Should().Contain(_client);
+        Client client = result.Should().ContainSingle().Subject;
+        client.Should().BeEquivalentTo(_client);
     }
 
     [Fact]

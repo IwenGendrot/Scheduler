@@ -63,8 +63,8 @@ public class PatientServiceTests
     public void GetAll_ShouldReturnPatients()
     {
         IReadOnlyCollection<Patient> result = _patientService.GetAll();
-        result.Should().NotBeNullOrEmpty();
-        result.Should().Contain(_patient);
+        Patient patient = result.Should().ContainSingle().Subject;
+        patient.Should().BeEquivalentTo(_patient);
     }
 
     [Fact]
