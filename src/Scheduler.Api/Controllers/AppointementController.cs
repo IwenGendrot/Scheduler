@@ -53,7 +53,7 @@ public class AppointementController(IAppointementService appointementService, IC
         {
             return BadRequest(ModelState);
         }
-        return Ok(_appointementService.GetAvailableHoursOnDate(dto.ClientId, dto.AppointementDate));
+        return Ok(_appointementService.GetAvailableHoursOnDate(dto));
     }
 
 

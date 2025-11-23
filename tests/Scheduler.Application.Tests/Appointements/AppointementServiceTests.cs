@@ -153,7 +153,7 @@ public class AppointementServiceTests
     [Fact]
     public void GetAvailableHoursOnDate_ShouldReturnAvailableTimes()
     {
-        IReadOnlyCollection<int> result = _appointementService.GetAvailableHoursOnDate(_clientId, _appointementDate);
+        IReadOnlyCollection<int> result = _appointementService.GetAvailableHoursOnDate(new GetAvailableAppointementDto(_clientId, _appointementDate));
         result.Should().BeEquivalentTo(_availableHours);
     }
 }

@@ -17,9 +17,9 @@ public class AppointementService(IAppointementRepository appointementRepository)
         return _appointementRepository.Get(id);
     }
 
-    public IReadOnlyCollection<int> GetAvailableHoursOnDate(Guid clientId, DateOnly appointementDate)
+    public IReadOnlyCollection<int> GetAvailableHoursOnDate(GetAvailableAppointementDto dto)
     {
-        return _appointementRepository.GetAvailableHoursOnDate(clientId, appointementDate);
+        return _appointementRepository.GetAvailableHoursOnDate(dto.ClientId, dto.AppointementDate);
     }
 
     public IReadOnlyCollection<Appointement> GetAll()
