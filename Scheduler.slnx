@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/SolutionItems/">
+    <File Path=".github/workflows/dotnet.yml" />
+  </Folder>
   <Folder Name="/Tests/">
     <Project Path="tests/Scheduler.Application.Tests/Scheduler.Application.Tests.csproj" Id="d73ad6ac-c428-48f0-af05-fb5d9cd493bf" />
   </Folder>
