@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/SolutionItems/">
+    <File Path=".github/workflows/dotnet.yml" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/Scheduler.Application.Tests/Scheduler.Application.Tests.csproj" Id="d73ad6ac-c428-48f0-af05-fb5d9cd493bf" />
+  </Folder>
+  <Project Path="src/Scheduler.Api/Scheduler.Api.csproj" />
+  <Project Path="src/Scheduler.Application/Scheduler.Application.csproj" Id="322f25e8-026e-4de0-94e3-620c01d20acc" />
+  <Project Path="src/Scheduler.Data.InMemory/Scheduler.Data.InMemory.csproj" Id="27313b38-cbea-4cf0-aa98-3074a5af8f2c" />
+  <Project Path="src/Scheduler.Data/Scheduler.Data.csproj" Id="e0bc25f3-ba3c-4de5-81bc-84f238cf1a7a" />
+  <Project Path="src/Scheduler/Scheduler.csproj" Id="3877149f-fb3e-4687-9301-e537caedd3d7" />
+</Solution>
