@@ -20,6 +20,7 @@ public class AppointementServiceTests
     private readonly DateOnly _appointementDate;
     private readonly int _appointementHour;
     private readonly int _newAppointementHour;
+    private readonly int[] _availableHours;
 
     public AppointementServiceTests()
     {
@@ -32,6 +33,7 @@ public class AppointementServiceTests
         _appointementDate = new DateOnly(2025, 11, 17);
         _appointementHour = 11;
         _newAppointementHour = 17;
+        _availableHours = [10, 12, 13, 14, 15, 16, 17, 18];
 
         _appointement = new(_appointementId, _clientId, _patientId, _appointementDate, _appointementHour);
         _newAppointement = new(_appointementId, _clientId, _patientId, _appointementDate, _newAppointementHour);
@@ -54,6 +56,8 @@ public class AppointementServiceTests
 
         _mockAppointementRepository.Setup(r => r.Update(_fakeAppointementId, It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateOnly>(), It.IsAny<int>())).Throws(new KeyNotFoundException());
         _mockAppointementRepository.Setup(r => r.Update(_appointementId, _clientId, _patientId, _appointementDate, _newAppointementHour)).Returns(_newAppointement);
+
+        _mockAppointementRepository.Setup(r => r.GetAvailableHoursOnDate(_clientId, _appointementDate)).Returns(_availableHours);
 
         _appointementService = new(_mockAppointementRepository.Object);
     }
@@ -144,5 +148,12 @@ public class AppointementServiceTests
     {
         Action action = () => _appointementService.Update(_fakeAppointementId, new UpdateAppointementDto(_clientId, _patientId, _appointementDate, _newAppointementHour));
         action.Should().Throw<KeyNotFoundException>();
+    }
+
+    [Fact]
+    public void GetAvailableHoursOnDate_ShouldReturnAvailableTimes()
+    {
+        IReadOnlyCollection<int> result = _appointementService.GetAvailableHoursOnDate(_clientId, _appointementDate);
+        result.Should().BeEquivalentTo(_availableHours);
     }
 }
