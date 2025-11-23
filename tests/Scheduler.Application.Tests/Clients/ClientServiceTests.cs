@@ -30,6 +30,8 @@ public class ClientServiceTests
         _mockClientRepository.Setup(r => r.Get(It.IsAny<Guid>())).Throws(new KeyNotFoundException());
         _mockClientRepository.Setup(r => r.Get(_clientId)).Returns(_client);
 
+        _mockClientRepository.Setup(r => r.GetAll()).Returns([_client]);
+
         _mockClientRepository.Setup(r => r.Create(_clientName)).Returns(_client);
 
         _mockClientRepository.Setup(r => r.Update(_clientId, _clientNewName)).Returns(_newClient);
