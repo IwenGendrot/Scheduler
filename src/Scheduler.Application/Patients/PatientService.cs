@@ -1,16 +1,13 @@
 ﻿using Scheduler.Application.Patients.Dtos;
+using Scheduler.Data.Clients.Repositories;
 using Scheduler.Data.Patients.Repositories;
 
 namespace Scheduler.Application.Patients;
 
-public class PatientService : IPatientService
+public class PatientService(IClientRepository clientRepository, IPatientRepository patientRepository) : IPatientService
 {
-    private readonly IPatientRepository _patientRepository;
-
-    public PatientService(IPatientRepository patientRepository)
-    {
-        _patientRepository = patientRepository;
-    }
+    private readonly IClientRepository _clientRepository = clientRepository;
+    private readonly IPatientRepository _patientRepository = patientRepository;
 
     public Patient Create(CreatePatientDto dto)
     {
@@ -29,6 +26,7 @@ public class PatientService : IPatientService
 
     public Patient Update(Guid id, UpdatePatientDto dto)
     {
+        _clientRepository.Get(dto.ClientId);
         return _patientRepository.Update(id, dto.ClientId, dto.Name);
     }
 }

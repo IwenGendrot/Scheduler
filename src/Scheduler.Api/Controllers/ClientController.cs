@@ -8,14 +8,9 @@ namespace Scheduler.Api.Controllers;
 [ApiController]
 [Route("client")]
 [Produces(MediaTypeNames.Application.Json)]
-public class ClientController : ControllerBase
+public class ClientController(IClientService clientService) : ControllerBase
 {
-    private readonly IClientService _clientService;
-
-    public ClientController(IClientService clientService)
-    {
-        _clientService = clientService;
-    }
+    private readonly IClientService _clientService = clientService;
 
     /// <summary>
     /// Get a client looking for its id

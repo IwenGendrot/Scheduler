@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Scheduler.Application.Appointements;
 using Scheduler.Application.Appointements.Dtos;
-using Scheduler.Application.Clients;
-using Scheduler.Application.Patients;
 using System.Net.Mime;
 
 namespace Scheduler.Api.Controllers;
@@ -10,11 +8,9 @@ namespace Scheduler.Api.Controllers;
 [ApiController]
 [Route("appointement")]
 [Produces(MediaTypeNames.Application.Json)]
-public class AppointementController(IAppointementService appointementService, IClientService clientService, IPatientService patientService) : ControllerBase
+public class AppointementController(IAppointementService appointementService) : ControllerBase
 {
     private readonly IAppointementService _appointementService = appointementService;
-    private readonly IClientService _clientService = clientService;
-    private readonly IPatientService _patientService = patientService;
 
     /// <summary>
     /// Get appointement from its id
@@ -45,9 +41,9 @@ public class AppointementController(IAppointementService appointementService, IC
     [HttpPost("client/date")]
     [ProducesResponseType<IReadOnlyCollection<int>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetAvailableHoursOnDate([FromBody] GetAvailableAppointementDto dto)
     {
-        CheckClientExistence(dto.ClientId);
         CheckAppointementDate(dto.AppointementDate);
         if (!ModelState.IsValid)
         {
@@ -65,9 +61,9 @@ public class AppointementController(IAppointementService appointementService, IC
     [HttpGet("client/{clientId:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetForClient([FromRoute] Guid clientId)
     {
-        CheckClientExistence(clientId);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -83,9 +79,9 @@ public class AppointementController(IAppointementService appointementService, IC
     [HttpGet("patient/{patientId:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetForPatient([FromRoute] Guid patientId)
     {
-        CheckPartnerExistence(patientId);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -102,10 +98,9 @@ public class AppointementController(IAppointementService appointementService, IC
     [HttpGet("client/{clientId:guid}/patient/{patientId:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetForClientAndPatient([FromRoute] Guid clientId, [FromRoute] Guid patientId)
     {
-        CheckClientExistence(clientId);
-        CheckPartnerExistence(patientId);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -132,11 +127,10 @@ public class AppointementController(IAppointementService appointementService, IC
     [HttpPost]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Create([FromBody] CreateAppointementDto dto)
     {
         CheckAppointementDate(dto.AppointementDate);
-        CheckClientExistence(dto.ClientId);
-        CheckPartnerExistence(dto.PatientId);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -154,41 +148,16 @@ public class AppointementController(IAppointementService appointementService, IC
     [HttpPut("{id:guid}")]
     [ProducesResponseType<IReadOnlyCollection<Appointement>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateAppointementDto dto)
     {
         CheckAppointementDate(dto.AppointementDate);
-        CheckClientExistence(dto.ClientId);
-        CheckPartnerExistence(dto.PatientId);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
         Appointement appointement = _appointementService.Update(id, dto);
         return CreatedAtAction(nameof(Get), new { id = appointement.Id }, appointement);
-    }
-
-    private void CheckClientExistence(Guid clientId)
-    {
-        try
-        {
-            _clientService.Get(clientId);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            ModelState.AddModelError("Client does not exist", ex.Message);
-        }
-    }
-
-    private void CheckPartnerExistence(Guid patientId)
-    {
-        try
-        {
-            _patientService.Get(patientId);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            ModelState.AddModelError("Patient does not exist", ex.Message);
-        }
     }
 
     private void CheckAppointementDate(DateOnly appointementDate)

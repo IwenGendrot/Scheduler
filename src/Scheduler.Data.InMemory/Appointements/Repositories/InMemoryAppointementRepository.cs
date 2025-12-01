@@ -28,9 +28,9 @@ public class InMemoryAppointementRepository : IAppointementRepository
         return _appointements.AsReadOnly();
     }
 
-    public IReadOnlyCollection<int> GetAvailableHoursOnDate(Guid clientId, DateOnly appointementDate)
+    public IReadOnlyCollection<int> GetAvailableHoursOnDate(DateOnly appointementDate)
     {
-        IEnumerable<int> bookedHours = _appointements.Where(a => a.ClientId == clientId && a.AppointementDate == appointementDate).Select(a => a.Hour);
+        IEnumerable<int> bookedHours = _appointements.Where(a => a.AppointementDate == appointementDate).Select(a => a.Hour);
         return BookableHours.Except(bookedHours).ToList().AsReadOnly();
     }
 
@@ -55,10 +55,10 @@ public class InMemoryAppointementRepository : IAppointementRepository
         return _appointements.Where(c => c.PatientId == patientId).ToList().AsReadOnly();
     }
 
-    public Appointement Update(Guid id, Guid clientId, Guid patientId, DateOnly appointementDate, int hour)
+    public Appointement Update(Guid id, DateOnly appointementDate, int hour)
     {
-        Appointement appointement = _appointements.FirstOrDefault(a => a.Id == id) ?? throw new KeyNotFoundException($"No appointement for id {id}");
-        if (_appointements.FirstOrDefault(a => (a.ClientId == clientId || a.PatientId == patientId) && a.AppointementDate == appointementDate && a.Hour == hour) is not null)
+        Appointement appointement = Get(id);
+        if (_appointements.FirstOrDefault(a => a.AppointementDate == appointementDate && a.Hour == hour) is not null)
         {
             throw new ArgumentException("Client or patient is already booked at this time");
         }

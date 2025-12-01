@@ -25,8 +25,7 @@ public class InMemoryClientRepository : IClientRepository
 
     public Client Get(Guid id)
     {
-        Client client = _clients.FirstOrDefault(c => c.Id == id) ?? throw new KeyNotFoundException($"Not client for Id : {id}");
-        return client;
+        return _clients.FirstOrDefault(c => c.Id == id) ?? throw new KeyNotFoundException($"Not client for Id : {id}");
     }
 
     public Client Update(Guid id, string name)
