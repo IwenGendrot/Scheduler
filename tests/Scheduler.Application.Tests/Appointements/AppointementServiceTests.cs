@@ -3,6 +3,8 @@ using Moq;
 using Scheduler.Application.Appointements;
 using Scheduler.Application.Appointements.Dtos;
 using Scheduler.Data.Appointements.Repositories;
+using Scheduler.Data.Clients.Repositories;
+using Scheduler.Data.Patients.Repositories;
 
 namespace Scheduler.Application.Tests.Appointements;
 
@@ -10,6 +12,8 @@ public class AppointementServiceTests
 {
     private readonly AppointementService _appointementService;
     private readonly Mock<IAppointementRepository> _mockAppointementRepository;
+    private readonly Mock<IClientRepository> _mockClientRepository;
+    private readonly Mock<IPatientRepository> _mockPatientRepository;
 
     private readonly Appointement _appointement;
     private readonly Appointement _newAppointement;
@@ -24,8 +28,6 @@ public class AppointementServiceTests
 
     public AppointementServiceTests()
     {
-        _mockAppointementRepository = new();
-
         _appointementId = Guid.NewGuid();
         _fakeAppointementId = Guid.NewGuid();
         _clientId = Guid.NewGuid();
@@ -34,6 +36,18 @@ public class AppointementServiceTests
         _appointementHour = 11;
         _newAppointementHour = 17;
         _availableHours = [10, 12, 13, 14, 15, 16, 17, 18];
+
+        _mockAppointementRepository = new();
+        _mockClientRepository = new();
+        _mockPatientRepository = new();
+
+        Client client = new(_clientId, "");
+        _mockClientRepository.Setup(r => r.Get(It.IsAny<Guid>())).Throws(new KeyNotFoundException());
+        _mockClientRepository.Setup(r => r.Get(_clientId)).Returns(client);
+
+        Patient patient = new(_patientId, _clientId, "");
+        _mockPatientRepository.Setup(r => r.Get(It.IsAny<Guid>())).Throws(new KeyNotFoundException());
+        _mockPatientRepository.Setup(r => r.Get(_patientId)).Returns(patient);
 
         _appointement = new(_appointementId, _clientId, _patientId, _appointementDate, _appointementHour);
         _newAppointement = new(_appointementId, _clientId, _patientId, _appointementDate, _newAppointementHour);
@@ -54,12 +68,12 @@ public class AppointementServiceTests
 
         _mockAppointementRepository.Setup(r => r.Create(_clientId, _patientId, _appointementDate, _appointementHour)).Returns(_appointement);
 
-        _mockAppointementRepository.Setup(r => r.Update(_fakeAppointementId, It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<DateOnly>(), It.IsAny<int>())).Throws(new KeyNotFoundException());
-        _mockAppointementRepository.Setup(r => r.Update(_appointementId, _clientId, _patientId, _appointementDate, _newAppointementHour)).Returns(_newAppointement);
+        _mockAppointementRepository.Setup(r => r.Update(_fakeAppointementId, It.IsAny<DateOnly>(), It.IsAny<int>())).Throws(new KeyNotFoundException());
+        _mockAppointementRepository.Setup(r => r.Update(_appointementId, _appointementDate, _newAppointementHour)).Returns(_newAppointement);
 
-        _mockAppointementRepository.Setup(r => r.GetAvailableHoursOnDate(_clientId, _appointementDate)).Returns(_availableHours);
+        _mockAppointementRepository.Setup(r => r.GetAvailableHoursOnDate(_appointementDate)).Returns(_availableHours);
 
-        _appointementService = new(_mockAppointementRepository.Object);
+        _appointementService = new(_mockAppointementRepository.Object, _mockClientRepository.Object, _mockPatientRepository.Object);
     }
 
     [Fact]
@@ -87,8 +101,8 @@ public class AppointementServiceTests
     [Fact]
     public void GetAllForClient_WhenClientNotFound_ShouldReturnEmpty()
     {
-        IReadOnlyCollection<Appointement> result = _appointementService.GetForClient(_fakeAppointementId);
-        result.Should().BeEmpty();
+        Action action = () => _appointementService.GetForClient(_fakeAppointementId);
+        action.Should().Throw<KeyNotFoundException>();
     }
 
     [Fact]
@@ -102,8 +116,8 @@ public class AppointementServiceTests
     [Fact]
     public void GetAllForPatient_WhenPatientNotFound_ShouldReturnEmpty()
     {
-        IReadOnlyCollection<Appointement> result = _appointementService.GetForPatient(_fakeAppointementId);
-        result.Should().BeEmpty();
+        Action action = () => _appointementService.GetForPatient(_fakeAppointementId);
+        action.Should().Throw<KeyNotFoundException>();
     }
 
     [Fact]
@@ -117,8 +131,8 @@ public class AppointementServiceTests
     [Fact]
     public void GetForClientAndPatient_WhenPatientNotFound_ShouldReturnEmpty()
     {
-        IReadOnlyCollection<Appointement> result = _appointementService.GetForClientAndPatient(_fakeAppointementId, _fakeAppointementId);
-        result.Should().BeEmpty();
+        Action action = () => _appointementService.GetForClientAndPatient(_fakeAppointementId, _fakeAppointementId);
+        action.Should().Throw<KeyNotFoundException>();
     }
 
     [Fact]
@@ -139,14 +153,14 @@ public class AppointementServiceTests
     [Fact]
     public void Update_ShouldReturnUpdatedAppointement()
     {
-        Appointement result = _appointementService.Update(_appointementId, new UpdateAppointementDto(_clientId, _patientId, _appointementDate, _newAppointementHour));
+        Appointement result = _appointementService.Update(_appointementId, new UpdateAppointementDto(_appointementDate, _newAppointementHour));
         result.Should().BeEquivalentTo(_newAppointement);
     }
 
     [Fact]
     public void Update_WhenAppointementNotFound_ShouldThrow()
     {
-        Action action = () => _appointementService.Update(_fakeAppointementId, new UpdateAppointementDto(_clientId, _patientId, _appointementDate, _newAppointementHour));
+        Action action = () => _appointementService.Update(_fakeAppointementId, new UpdateAppointementDto(_appointementDate, _newAppointementHour));
         action.Should().Throw<KeyNotFoundException>();
     }
 
