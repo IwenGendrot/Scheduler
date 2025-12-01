@@ -2,6 +2,7 @@
 using Moq;
 using Scheduler.Application.Patients;
 using Scheduler.Application.Patients.Dtos;
+using Scheduler.Data.Clients.Repositories;
 using Scheduler.Data.Patients.Repositories;
 
 namespace Scheduler.Application.Tests.Patients;
@@ -10,6 +11,7 @@ public class PatientServiceTests
 {
     private readonly PatientService _patientService;
     private readonly Mock<IPatientRepository> _mockPatientRepository;
+    private readonly Mock<IClientRepository> _mockClientRepository;
 
     private readonly Guid _patientId;
     private readonly Guid _fakePatientId;
@@ -27,6 +29,13 @@ public class PatientServiceTests
         _newClientId = Guid.NewGuid();
         _fakePatientId = Guid.NewGuid();
 
+        Client client = new(_clientId, "");
+        Client newClient = new(_newClientId, "");
+        _mockClientRepository = new();
+        _mockClientRepository.Setup(r => r.Get(It.IsAny<Guid>())).Throws(new KeyNotFoundException());
+        _mockClientRepository.Setup(r => r.Get(_clientId)).Returns(client);
+        _mockClientRepository.Setup(r => r.Get(_newClientId)).Returns(newClient);
+
         _mockPatientRepository = new();
         _patient = new(_patientId, _clientId, _patientName);
         _newPatient = new(_patientId, _newClientId, _patientNewName);
@@ -41,7 +50,7 @@ public class PatientServiceTests
         _mockPatientRepository.Setup(r => r.Update(_patientId, _newClientId, _patientNewName)).Returns(_newPatient);
         _mockPatientRepository.Setup(r => r.Update(_fakePatientId, It.IsAny<Guid>(), It.IsAny<string>())).Throws(new KeyNotFoundException());
 
-        _patientService = new(_mockPatientRepository.Object);
+        _patientService = new(_mockClientRepository.Object, _mockPatientRepository.Object);
     }
 
 

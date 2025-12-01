@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Scheduler.Application.Clients;
 using Scheduler.Application.Patients;
 using Scheduler.Application.Patients.Dtos;
 using System.Net.Mime;
@@ -9,9 +8,8 @@ namespace Scheduler.Api.Controllers;
 [ApiController]
 [Route("patient")]
 [Produces(MediaTypeNames.Application.Json)]
-public class PatientController(IPatientService patientService, IClientService clientService) : ControllerBase
+public class PatientController(IPatientService patientService) : ControllerBase
 {
-    private readonly IClientService _clientService = clientService;
     private readonly IPatientService _patientService = patientService;
 
     /// <summary>
@@ -60,7 +58,6 @@ public class PatientController(IPatientService patientService, IClientService cl
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Create([FromBody] CreatePatientDto dto)
     {
-        CheckClientExistence(dto.ClientId);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -83,7 +80,6 @@ public class PatientController(IPatientService patientService, IClientService cl
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdatePatientDto dto)
     {
-        CheckClientExistence(dto.ClientId);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
@@ -96,18 +92,6 @@ public class PatientController(IPatientService patientService, IClientService cl
         catch (KeyNotFoundException ex)
         {
             return NotFound(ex.Message);
-        }
-    }
-
-    private void CheckClientExistence(Guid clientId)
-    {
-        try
-        {
-            _clientService.Get(clientId);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            ModelState.AddModelError("Client does not exist", ex.Message);
         }
     }
 }
